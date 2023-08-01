@@ -52,7 +52,7 @@ export default function Home() {
           </ul>
         ) : (
           <div className={styles.noBooksText}>
-            <p>No Books added yet. Click "Add+" to add new Books.</p>
+            <p>No Books added yet. Click &quot;Add+&quot; to add new Books.</p>
           </div>
         )}
       </div>
