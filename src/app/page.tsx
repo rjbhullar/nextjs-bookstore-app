@@ -1,95 +1,67 @@
+"use client"
+
 import Image from 'next/image'
 import styles from './page.module.css'
+import { useAppDispatch, useAppSelector } from '@/redux/store';
+import { Suspense, useState } from 'react';
+import { Book, deleteBook } from '@/redux/features/booksSlice';
+import AddBookPopup from '@/components/addBookPopupComp/addBookPopup';
 
 export default function Home() {
+  const bookList = useAppSelector((state) => state.booksReducer.bookList);
+  const [isAddEditModelOpen, setAddEditModal] = useState(false);
+  const [bookToBeEdited, setBookToBeEdited] = useState<Book | null>(null);
+
+  const dispatch = useAppDispatch();
+
+  const toggleModal = (bookToBeEdited: Book | null = null) => {
+    setBookToBeEdited(bookToBeEdited);
+    setAddEditModal((isOpen) => !isOpen);
+  };
+
+  const deleteBookById = (event: React.MouseEvent, bookId: string) => {
+    event.stopPropagation();
+    dispatch(deleteBook(bookId));
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+    <>
+      <div className={styles.bookList}>
+        <h1 className={`${styles.appHeader} h-centered mb-20`}>The Book Store 📚</h1>
+        <button className={`${styles.addBtn} blue-button h-centered`} onClick={() => toggleModal()}>
+          Add +
+        </button>
+        {bookList.length > 0 ? (
+          <ul className={styles.booksList}>
+            {bookList.map((book) => (
+              <li className={styles.booksListItem} key={book.id}>
+                <div className="cursor-pointer" onClick={() => toggleModal(book)}>
+                  <h3 className={styles.bookName}>📘 {book.name}</h3>
+                  <p className={styles.bookDetails}>
+                    Category: <span className={styles.italicValue}>{book.category}</span>
+                  </p>
+                  <p className={styles.bookDetails}>
+                    Price: <span className={styles.italicValue}>${book.price}</span>
+                  </p>
+                </div>
+                <button className={styles.deleteButton} onClick={(e) => deleteBookById(e, book.id as string)}>
+                  Delete
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className={styles.noBooksText}>
+            <p>No Books added yet. Click "Add+" to add new Books.</p>
+          </div>
+        )}
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+      {isAddEditModelOpen && (
+        <Suspense fallback={<div className="centered-div"> Loading... </div>}>
+          <AddBookPopup closeModal={toggleModal} initialBookDetails={bookToBeEdited} />
+        </Suspense>
+      )}
+    </>
+  );
 }
+
