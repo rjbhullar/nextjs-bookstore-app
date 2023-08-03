@@ -5,7 +5,10 @@ import styles from './page.module.css'
 import { useAppDispatch, useAppSelector } from '@/redux/store';
 import { Suspense, useState } from 'react';
 import { Book, deleteBook } from '@/redux/features/booksSlice';
-import AddBookPopup from '@/components/addBookPopupComp/addBookPopup';
+import dynamic from 'next/dynamic';
+import React from 'react';
+
+const AddBookPopup = dynamic(() => import('@/components/addBookPopupComp/addBookPopup'), { ssr: false })
 
 export default function Home() {
   const bookList = useAppSelector((state) => state.booksReducer.bookList);
